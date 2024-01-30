@@ -1,7 +1,9 @@
 from aiogram import types, Dispatcher
 from aiogram.dispatcher.filters import Text
+from aiogram.types import ReplyKeyboardRemove
+
 from create_bot import dp, bot, bot_address
-from keyboards.client_kb import kb_client_1, kb_client_2, kb_client_3
+from keyboards.client_kb import kb_client_1, kb_client_2, kb_client_3, kb_client_4, kb_client_5
 from school_database import sqlite_db
 from handlers import common
 
@@ -51,18 +53,14 @@ async def get_contacts(message: types.Message):
 #@dp.message_handler(Text(equals='Смотреть видео', ignore_case=True))
 async def get_training_courses(message: types.Message):
     common.old_message[message.from_user.id] = True
-    await bot.send_message(message.from_user.id, f'https://www.youtube.com/watch?v=Lc7pjgJkjzo')
+    await bot.send_message(message.from_user.id, f'https://www.youtube.com/watch?v=Lc7pjgJkjzo', reply_markup=ReplyKeyboardRemove())
 
 
 async def get_answer(message: types.Message):
     common.old_message[message.from_user.id] = False
-    await bot.send_message(message.from_user.id, f' 3.Фото или видео обращение Люси Снимать на телефон - это не прихоть, а необходимый навык, который пригодиться каждому.\n \
-- людям, которые хотят поменять профессию и зарабатывать на красивом творческом деле\n \
-- маме-домохозяйке, чтобы снимать семейные праздники и взросление ребенка\n \
-- эксперту и предпринимателю, которые сами ведут акааунты в социальных сетях и продвигаются в онла\n \
-Я знаю, как снимать красиво и легко на телефон. Делюсь с вами в коротком практикуме, состоящем из 3-х коротких уроков. \
-Смотрите видео прямо сейчас и сразу выполняйте легкие задания, чтобы научиться делать красиввые фото и видео на телефон. \
-+кнопка смотреть видео', reply_markup=kb_client_3)
+    await bot.send_message(message.from_user.id, f'6. Отлично! Так держать. Вы уже узнали о настройках'
+                                                 f' телефона и разобрались с уникальным стилем в съемке. Приготовила для вас подарок'
+                                                 f' "тренажер насмотренности" Файл "Тренажер насмотренности"о', reply_markup=kb_client_5)
 
 
 #@dp.message_handler(Text(equals='Преподаватели', ignore_case=True))

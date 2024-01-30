@@ -19,4 +19,4 @@ dp = Dispatcher(bot, storage=storage)
 
 
 client_commands = ['/start', '/help', 'Преподаватели', 'Тренировки', 'Далее',\
-    'Привет', '/moderate']
+    'Привет', '/moderate', 'Спасибо']

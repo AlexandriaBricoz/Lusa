@@ -13,12 +13,22 @@ but1 = KeyboardButton('Привет')
 kb_client_1 = ReplyKeyboardMarkup(resize_keyboard=True)
 kb_client_1.add(but1)
 
-but1 = KeyboardButton('Далее')
+but2 = KeyboardButton('Далее')
 
 kb_client_2 = ReplyKeyboardMarkup(resize_keyboard=True)
-kb_client_2.add(but1)
+kb_client_2.add(but2)
 
-but1 = KeyboardButton('Смотреть видео')
+but3 = KeyboardButton('Смотреть видео')
 
 kb_client_3 = ReplyKeyboardMarkup(resize_keyboard=True)
-kb_client_3.add(but1)
+kb_client_3.add(but3)
+
+but4 = KeyboardButton('')
+
+kb_client_4 = ReplyKeyboardMarkup(resize_keyboard=True)
+kb_client_4.add(but4)
+
+but5 = KeyboardButton('Спасибо')
+
+kb_client_5 = ReplyKeyboardMarkup(resize_keyboard=True)
+kb_client_5.add(but5)
