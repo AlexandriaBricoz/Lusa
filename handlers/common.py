@@ -16,4 +16,3 @@ async def clean_chat(message: types.Message):
 
 def register_common_handlers(dp: Dispatcher):
     dp.register_message_handler(clean_chat)
-

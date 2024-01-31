@@ -1,22 +1,24 @@
 from aiogram import types, Dispatcher
+from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
+from aiogram.dispatcher.filters.state import StatesGroup, State
 from aiogram.types import ReplyKeyboardRemove
 
 from create_bot import dp, bot, bot_address
-from keyboards.client_kb import kb_client_1, kb_client_2, kb_client_3, kb_client_4, kb_client_5
-from school_database import sqlite_db
 from handlers import common
+from keyboards.client_kb import kb_client_1, kb_client_2, kb_client_3, kb_client_5
+from school_database import sqlite_db
 
 """Хендлеры для взаимодействия с клиентом
 """
 
 
-#@dp.message_handler(commands=['start', 'help'])
+# @dp.message_handler(commands=['start', 'help'])
 async def start_bot(message: types.Message):
     common.old_message[message.from_user.id] = False
     bot_home = bot_address  # можно указать адрес бота в телеграм строкой 't.me/bot'
     try:
-        await bot.send_message(message.from_user.id, 
+        await bot.send_message(message.from_user.id,
                                f'1. Привет /Имя/ Я бот-помощник Люси Жабиной контент фотографа '
                                f'Прежде чем мы отправимся в мир красивых фото и видео позволь '
                                f'познакомить тебя с Люсей поближе.', reply_markup=kb_client_1)
@@ -24,7 +26,8 @@ async def start_bot(message: types.Message):
     except:
         await message.reply(f'Пожалуйста напишите боту в ЛС: {bot_home}')
 
-#@dp.message_handler(Text(equals='Привет', ignore_case=True))
+
+# @dp.message_handler(Text(equals='Привет', ignore_case=True))
 async def get_work_hours(message: types.Message):
     common.old_message[message.from_user.id] = False
     await bot.send_message(message.from_user.id, f'2.Люся - бренд-фотограф и рилс-мейкер 7 лет'
@@ -33,11 +36,11 @@ async def get_work_hours(message: types.Message):
                                                  f' на телефон. Создала курс "Дело в кадре" для обучения'
                                                  f' онлайн Работает с такими брендами, как zaav_g, ognivo '
                                                  f'say da lab На своем канале↘️ Люся  делится фишками по  '
-                                                 f'съемке и монтажу + сслыка кнопка на ТГ канал (призыв подписаться)', reply_markup=kb_client_2)
+                                                 f'съемке и монтажу + сслыка кнопка на ТГ канал (призыв подписаться)',
+                           reply_markup=kb_client_2)
 
 
-
-#@dp.message_handler(Text(equals='Далее', ignore_case=True))
+# @dp.message_handler(Text(equals='Далее', ignore_case=True))
 async def get_contacts(message: types.Message):
     common.old_message[message.from_user.id] = False
     await bot.send_message(message.from_user.id, f' 3.Фото или видео обращение Люси Снимать на телефон - это не прихоть, а необходимый навык, который пригодиться каждому.\n" \
@@ -49,21 +52,52 @@ async def get_contacts(message: types.Message):
 +кнопка смотреть видео', reply_markup=kb_client_3)
 
 
-
-#@dp.message_handler(Text(equals='Смотреть видео', ignore_case=True))
+# @dp.message_handler(Text(equals='Смотреть видео', ignore_case=True))
+@dp.message_handler(Text(equals='Смотреть видео', ignore_case=True))
 async def get_training_courses(message: types.Message):
-    common.old_message[message.from_user.id] = True
-    await bot.send_message(message.from_user.id, f'https://www.youtube.com/watch?v=Lc7pjgJkjzo', reply_markup=ReplyKeyboardRemove())
+    # Сохраняем текущее сообщение в базу данных
+    await save_message_to_db(message)
+
+    # Посылаем ссылку на видео и убираем клавиатуру
+    await bot.send_message(message.from_user.id, f'https://www.youtube.com/watch?v=Lc7pjgJkjzo',
+                           reply_markup=ReplyKeyboardRemove())
+
+    # Ожидаем следующее сообщение
+    await YourStateName.next()
 
 
-async def get_answer(message: types.Message):
-    common.old_message[message.from_user.id] = False
+# Создаем состояние для ожидания следующего сообщения
+class YourStateName(StatesGroup):
+    waiting_for_next_message = State()
+
+
+async def save_message_to_db(message: types.Message):
+    # Ваш код для сохранения сообщения в базу данных
+    user_id = message.from_user.id
+    text = message.text
+
+
+# Обработчик следующего сообщения после команды "Смотреть видео"
+@dp.message_handler(state=YourStateName.waiting_for_next_message)
+async def process_next_message(message: types.Message, state: FSMContext):
+    # Сохраняем следующее сообщение в базу данных
+    await save_message_to_db(message)
+
+    # Сбрасываем состояние
+    await state.finish()
+
     await bot.send_message(message.from_user.id, f'6. Отлично! Так держать. Вы уже узнали о настройках'
                                                  f' телефона и разобрались с уникальным стилем в съемке. Приготовила для вас подарок'
-                                                 f' "тренажер насмотренности" Файл "Тренажер насмотренности"о', reply_markup=kb_client_5)
+                                                 f' "тренажер насмотренности" Файл "Тренажер насмотренности"о',
+                           reply_markup=kb_client_5)
 
 
-#@dp.message_handler(Text(equals='Преподаватели', ignore_case=True))
+# async def get_answer(message: types.Message):
+#     common.old_message[message.from_user.id] = False
+
+
+
+# @dp.message_handler(Text(equals='Преподаватели', ignore_case=True))
 async def get_trainers_info(message: types.Message):
     await sqlite_db.sql_read_from_teachers(message)
 
@@ -74,4 +108,3 @@ def handlers_register(dp: Dispatcher):
     dp.register_message_handler(get_work_hours, Text(equals='Привет', ignore_case=True))
     dp.register_message_handler(get_training_courses, Text(equals='Смотреть видео', ignore_case=True))
     dp.register_message_handler(get_trainers_info, Text(equals='Преподаватели', ignore_case=True))
-    dp.register_message_handler(get_answer)
