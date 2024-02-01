@@ -1,8 +1,11 @@
+import asyncio
+
 from aiogram import types, Dispatcher
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher.filters.state import StatesGroup, State
 from aiogram.types import ReplyKeyboardRemove
+from aiogram.utils.exceptions import BotBlocked
 
 from create_bot import dp, bot, bot_address
 from handlers import common
@@ -52,30 +55,26 @@ async def get_contacts(message: types.Message):
 +кнопка смотреть видео', reply_markup=kb_client_3)
 
 
-# @dp.message_handler(Text(equals='Смотреть видео', ignore_case=True))
+# Предположим, что вы создали объект dp (Dispatcher), db (Database) и loop (EventLoop) в вашем коде
+
+# Создаем состояние для ожидания следующего сообщения
+class YourStateName(StatesGroup):
+    waiting_for_next_message = State()
+
+# Обработчик команды "Смотреть видео"
 @dp.message_handler(Text(equals='Смотреть видео', ignore_case=True))
 async def get_training_courses(message: types.Message):
     # Сохраняем текущее сообщение в базу данных
-    await save_message_to_db(message)
 
     # Посылаем ссылку на видео и убираем клавиатуру
     await bot.send_message(message.from_user.id, f'https://www.youtube.com/watch?v=Lc7pjgJkjzo',
                            reply_markup=ReplyKeyboardRemove())
 
     # Ожидаем следующее сообщение
-    await YourStateName.next()
+    await YourStateName.waiting_for_next_message.set()
 
-
-# Создаем состояние для ожидания следующего сообщения
-class YourStateName(StatesGroup):
-    waiting_for_next_message = State()
-
-
-async def save_message_to_db(message: types.Message):
-    # Ваш код для сохранения сообщения в базу данных
-    user_id = message.from_user.id
-    text = message.text
-
+    # Запускаем таймер на 2 минуты
+    asyncio.create_task(wait_for_response(message.from_user.id))
 
 # Обработчик следующего сообщения после команды "Смотреть видео"
 @dp.message_handler(state=YourStateName.waiting_for_next_message)
@@ -86,12 +85,42 @@ async def process_next_message(message: types.Message, state: FSMContext):
     # Сбрасываем состояние
     await state.finish()
 
-    await bot.send_message(message.from_user.id, f'6. Отлично! Так держать. Вы уже узнали о настройках'
-                                                 f' телефона и разобрались с уникальным стилем в съемке. Приготовила для вас подарок'
-                                                 f' "тренажер насмотренности" Файл "Тренажер насмотренности"о',
-                           reply_markup=kb_client_5)
+    # Далее ваш код обработки следующего сообщения
 
+    # Отменяем таймер, так как ответ получен
+    cancel_timer(message.from_user.id)
 
+async def save_message_to_db(message: types.Message):
+    # Ваш код для сохранения сообщения в базу данных
+    user_id = message.from_user.id
+    text = message.text
+    print(user_id,text)
+    # Дополнительные действия по сохранению в базе данных
+    # Например, используйте ORM, если у вас есть модели данных
+    # Или подходящую технологию для ваших потребностей
+    await bot.send_message(user_id, f'Отлично! Так держать. Вы уже узнали о настройках телефона и'
+                                    f' разобрались с уникальным стилем в съемке. Приготовила для'
+                                    f' вас подарок "тренажер насмотренности"')
+
+async def wait_for_response(user_id):
+    await asyncio.sleep(30)  # Ожидаем 30 секунд
+
+    try:
+        # Отправляем напоминание
+        await bot.send_message(user_id, "Ссылка на видео сгорит через 12 часов. Посмотрите, чтобы:"
+                                        "\n- узнать секрет красивых фото и видео"
+                                        "\n- найти свой уникальный стиль в съемке и выделяться среди других", reply_markup=kb_client_3)
+    except BotBlocked:
+        # Обработка исключения, если бот заблокирован пользователем
+        pass
+
+def cancel_timer(user_id):
+    # Отменяем таймер, если ответ получен
+    # Если используете asyncio.ensure_future, можно также использовать task.cancel()
+    # В данном примере мы просто удаляем таймер из очереди выполнения asyncio
+    for task in asyncio.all_tasks():
+        if task.get_coro() == wait_for_response and task.get_coro().cr_frame.f_locals['user_id'] == user_id:
+            task.cancel()
 # async def get_answer(message: types.Message):
 #     common.old_message[message.from_user.id] = False
 
