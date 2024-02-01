@@ -1,15 +1,15 @@
 import asyncio
 
-from aiogram import types, Dispatcher
+from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
-from aiogram.dispatcher.filters.state import StatesGroup, State
+from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.types import ReplyKeyboardRemove
 from aiogram.utils.exceptions import BotBlocked
 
 from create_bot import dp, bot, bot_address
 from handlers import common
-from keyboards.client_kb import kb_client_1, kb_client_2, kb_client_3, kb_client_5
+from keyboards.client_kb import kb_client_1, kb_client_2, kb_client_3
 from school_database import sqlite_db
 
 """Хендлеры для взаимодействия с клиентом
@@ -22,7 +22,7 @@ async def start_bot(message: types.Message):
     bot_home = bot_address  # можно указать адрес бота в телеграм строкой 't.me/bot'
     try:
         await bot.send_message(message.from_user.id,
-                               f'1. Привет /Имя/ Я бот-помощник Люси Жабиной контент фотографа '
+                               f'Привет, {message.from_user.full_name}, Я бот-помощник Люси Жабиной контент фотографа '
                                f'Прежде чем мы отправимся в мир красивых фото и видео позволь '
                                f'познакомить тебя с Люсей поближе.', reply_markup=kb_client_1)
         await message.delete()
@@ -33,7 +33,7 @@ async def start_bot(message: types.Message):
 # @dp.message_handler(Text(equals='Привет', ignore_case=True))
 async def get_work_hours(message: types.Message):
     common.old_message[message.from_user.id] = False
-    await bot.send_message(message.from_user.id, f'2.Люся - бренд-фотограф и рилс-мейкер 7 лет'
+    await bot.send_message(message.from_user.id, f'Люся - бренд-фотограф и рилс-мейкер 7 лет'
                                                  f' профессионально занимается фото и видео съемкой '
                                                  f'Обучила офлайн более 100 человек контентной съемке'
                                                  f' на телефон. Создала курс "Дело в кадре" для обучения'
@@ -46,7 +46,7 @@ async def get_work_hours(message: types.Message):
 # @dp.message_handler(Text(equals='Далее', ignore_case=True))
 async def get_contacts(message: types.Message):
     common.old_message[message.from_user.id] = False
-    await bot.send_message(message.from_user.id, f' 3.Фото или видео обращение Люси Снимать на телефон - это не прихоть, а необходимый навык, который пригодиться каждому.\n" \
+    await bot.send_message(message.from_user.id, f' Фото или видео обращение Люси Снимать на телефон - это не прихоть, а необходимый навык, который пригодиться каждому.\n" \
 - людям, которые хотят поменять профессию и зарабатывать на красивом творческом деле\n \
 - маме-домохозяйке, чтобы снимать семейные праздники и взросление ребенка\n \
 - эксперту и предпринимателю, которые сами ведут акааунты в социальных сетях и продвигаются в онла\n \
@@ -55,75 +55,81 @@ async def get_contacts(message: types.Message):
 +кнопка смотреть видео', reply_markup=kb_client_3)
 
 
-# Предположим, что вы создали объект dp (Dispatcher), db (Database) и loop (EventLoop) в вашем коде
+file_path = '/Users/aleksey/Desktop/File.txt'
+...
 
-# Создаем состояние для ожидания следующего сообщения
+
+# Инициализация бота и диспетчера здесь (пример):
+# bot = Bot(token='YOUR_BOT_TOKEN')
+# dp = Dispatcher(bot)
+
 class YourStateName(StatesGroup):
+    photo_sent = State()
     waiting_for_next_message = State()
 
-# Обработчик команды "Смотреть видео"
+
+timers = {}
+
+
 @dp.message_handler(Text(equals='Смотреть видео', ignore_case=True))
-async def get_training_courses(message: types.Message):
-    # Сохраняем текущее сообщение в базу данных
-
-    # Посылаем ссылку на видео и убираем клавиатуру
-    await bot.send_message(message.from_user.id, f'https://www.youtube.com/watch?v=Lc7pjgJkjzo',
+async def get_training_courses(message: types.Message, state: FSMContext):
+    await bot.send_message(message.from_user.id, 'https://www.youtube.com/watch?v=Lc7pjgJkjzo',
                            reply_markup=ReplyKeyboardRemove())
+    await bot.send_message(message.from_user.id,
+                           'Видео доступно всего 24 часа. Посмотрите прямо сейчас. Это займет всего ... 7 минут + кнопка смотреть видео',
+                           reply_markup=kb_client_3)
 
-    # Ожидаем следующее сообщение
+    if message.from_user.id in timers:
+        timers[message.from_user.id].cancel()
+
+    timers[message.from_user.id] = asyncio.create_task(wait_for_response(message.from_user.id, state))
     await YourStateName.waiting_for_next_message.set()
 
-    # Запускаем таймер на 2 минуты
-    asyncio.create_task(wait_for_response(message.from_user.id))
 
-# Обработчик следующего сообщения после команды "Смотреть видео"
 @dp.message_handler(state=YourStateName.waiting_for_next_message)
 async def process_next_message(message: types.Message, state: FSMContext):
-    # Сохраняем следующее сообщение в базу данных
-    await save_message_to_db(message)
+    if message.text == '0':
+        cancel_timer(message.from_user.id)
+        await bot.send_message(message.from_user.id, f'https://www.youtube.com/watch?v=mMqURYfL4Z0')
+        await asyncio.sleep(10)
+        file_path = '/Users/aleksey/Desktop/тренажер насмотренности.txt'
+        await bot.send_message(message.from_user.id, f'Отлично! Так держать. Вы уже узнали о настройках телефона и'
+                                                     f' разобрались с уникальным стилем в съемке. Приготовила для'
+                                                     f' вас подарок "тренажер насмотренности"')
+        with open(file_path, 'rb') as document:
+            await bot.send_document(chat_id=message.from_user.id, document=document, caption='Описание к фото')
 
-    # Сбрасываем состояние
-    await state.finish()
+        await YourStateName.photo_sent.set()
+        await state.reset_state()
+    else:
+        await bot.send_message(message.from_user.id, "Вы не отправили фото...",
+                               reply_markup=kb_client_3)  # Укажите вашу клавиатуру kb_client_
 
-    # Далее ваш код обработки следующего сообщения
 
-    # Отменяем таймер, так как ответ получен
-    cancel_timer(message.from_user.id)
+# ...продолжение предыдущего сообщения
 
-async def save_message_to_db(message: types.Message):
-    # Ваш код для сохранения сообщения в базу данных
-    user_id = message.from_user.id
-    text = message.text
-    print(user_id,text)
-    # Дополнительные действия по сохранению в базе данных
-    # Например, используйте ORM, если у вас есть модели данных
-    # Или подходящую технологию для ваших потребностей
-    await bot.send_message(user_id, f'Отлично! Так держать. Вы уже узнали о настройках телефона и'
-                                    f' разобрались с уникальным стилем в съемке. Приготовила для'
-                                    f' вас подарок "тренажер насмотренности"')
-
-async def wait_for_response(user_id):
-    await asyncio.sleep(30)  # Ожидаем 30 секунд
-
+async def wait_for_response(user_id, state: FSMContext):
     try:
-        # Отправляем напоминание
-        await bot.send_message(user_id, "Ссылка на видео сгорит через 12 часов. Посмотрите, чтобы:"
-                                        "\n- узнать секрет красивых фото и видео"
-                                        "\n- найти свой уникальный стиль в съемке и выделяться среди других", reply_markup=kb_client_3)
+        await asyncio.sleep(10)  # Исправлено на 10 секунд
+
+        ...
+        current_state = await state.get_state()
+        if current_state != YourStateName.photo_sent.state:
+            await bot.send_message(user_id, "Ссылка на видео сгорит через 12 часов. Посмотрите, чтобы:"
+                                            "\n- узнать секрет красивых фото и видео"
+                                            "\n- найти свой уникальный стиль в съемке и выделяться среди других",
+                                   reply_markup=kb_client_3)  # Укажите вашу клавиатуру kb_client_3
     except BotBlocked:
-        # Обработка исключения, если бот заблокирован пользователем
-        pass
+        print(f"Bot was blocked by the user {user_id}")
+    finally:
+        if user_id in timers:
+            del timers[user_id]
+
 
 def cancel_timer(user_id):
-    # Отменяем таймер, если ответ получен
-    # Если используете asyncio.ensure_future, можно также использовать task.cancel()
-    # В данном примере мы просто удаляем таймер из очереди выполнения asyncio
-    for task in asyncio.all_tasks():
-        if task.get_coro() == wait_for_response and task.get_coro().cr_frame.f_locals['user_id'] == user_id:
-            task.cancel()
-# async def get_answer(message: types.Message):
-#     common.old_message[message.from_user.id] = False
-
+    if user_id in timers:
+        timers[user_id].cancel()
+        del timers[user_id]
 
 
 # @dp.message_handler(Text(equals='Преподаватели', ignore_case=True))
