@@ -18,5 +18,5 @@ bot = Bot(token=config_data["Token"])
 dp = Dispatcher(bot, storage=storage)
 
 
-client_commands = ['/start', '/help', 'Преподаватели', 'Тренировки', 'Далее',\
-    'Привет', '/moderate', 'Спасибо']
+client_commands = ['/start', '/help', 'Посмотрел', 'Далее',\
+    'Привет', '/moderate', 'Спасибо', 'Супер']
