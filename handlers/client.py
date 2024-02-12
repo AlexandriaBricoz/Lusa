@@ -8,7 +8,7 @@ from aiogram.types import ReplyKeyboardRemove
 from aiogram.utils.exceptions import BotBlocked
 
 from create_bot import dp, bot, bot_address
-from keyboards.client_kb import kb_client_1, kb_client_3, kb_client_5, kb_client
+from keyboards.client_kb import kb_client_1, kb_client_3, kb_client_5, kb_client, keyboard_tg, kb_client_next
 
 
 class YourStateName(StatesGroup):
@@ -38,9 +38,9 @@ async def start_bot(message: types.Message):
 
 @dp.message_handler(Text(equals='👋 Привет', ignore_case=True))
 async def hi(message: types.Message):
-    await bot.send_message(message.from_user.id,
-                           'https://youtube.com/shorts/_KGZjDVQat4?si=S7t8ElorE7RJ-s2r',
-                           reply_markup=kb_client_3)
+    # await bot.send_message(message.from_user.id,
+    #                        'https://youtube.com/shorts/_KGZjDVQat4?si=S7t8ElorE7RJ-s2r',
+    # reply_markup=kb_client_3)
     await bot.send_message(message.from_user.id,
                            "🔺7 лет профессионально занимается фото и видео съемкой\n"
                            "🔺Обучила офлайн более 100 человек контентной съемке на телефон.\n"
@@ -48,8 +48,17 @@ async def hi(message: types.Message):
                            "🔺Работает с такими брендами, как zaav_g, ognivo, say da lab, YNE \n\n"
                            "На своем канале  Люся делится фишками по съемке и монтажу\n"
                            "Подпишись и возвращайся сюда, чтобы получить 3 урока по контентной съемке\n"
-                           "⤵️⤵️⤵️\n"
-                           'https://t.me/lusy_zhabina',
+                           "⤵️⤵️⤵️\n",
+                           reply_markup=keyboard_tg)
+    await bot.send_message(message.from_user.id,
+                           "Подписывайся и возвращайся",
+                           reply_markup=kb_client_next)
+
+
+@dp.message_handler(Text(equals='Продолжить', ignore_case=True))
+async def next(message: types.Message):
+    await bot.send_message(message.from_user.id,
+                           'https://youtube.com/shorts/_KGZjDVQat4?si=S7t8ElorE7RJ-s2r',
                            reply_markup=kb_client_3)
 
 
@@ -122,12 +131,12 @@ async def wait_for_response(user_id, state: FSMContext):
 
 @dp.message_handler(Text(equals='Лайфхак', ignore_case=True))
 async def video_3(message: types.Message):
-    file_path = '/Users/aleksey/Desktop/тренажер насмотренности.txt'
+    file_path = 'Список для тренировки насмотрености.pdf'
     with open(file_path, 'rb') as document:
         await bot.send_document(
             chat_id=message.from_user.id,
             document=document,
-            caption="Приготовила для вас подарок - \"Тренажер насмотренности\". 🎁",
+            caption="Приготовила для вас подарок - \"Список для тренировки насмотрености\". 🎁",
             reply_markup=ReplyKeyboardRemove()
         )
     await bot.send_message(message.from_user.id, f'https://youtu.be/_bY3rY2Vi2w?si=udLXMDjmeNkKUzdd',
@@ -136,12 +145,12 @@ async def video_3(message: types.Message):
 
 @dp.message_handler(Text(equals='лайфхак', ignore_case=True))
 async def video_3_1(message: types.Message):
-    file_path = '/Users/aleksey/Desktop/тренажер насмотренности.txt'
+    file_path = 'Список для тренировки насмотрености.pdf'
     with open(file_path, 'rb') as document:
         await bot.send_document(
             chat_id=message.from_user.id,
             document=document,
-            caption="Приготовила для вас подарок - \"Тренажер насмотренности\". 🎁",
+            caption="Приготовила для вас подарок - \"Список для тренировки насмотрености\". 🎁",
             reply_markup=ReplyKeyboardRemove()
         )
     await bot.send_message(message.from_user.id, f'https://youtu.be/_bY3rY2Vi2w?si=udLXMDjmeNkKUzdd',
