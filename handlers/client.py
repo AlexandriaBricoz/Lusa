@@ -52,6 +52,7 @@ async def hi(message: types.Message):
                            'https://t.me/lusy_zhabina',
                            reply_markup=kb_client_3)
 
+
 @dp.message_handler(Text(equals='📹 Смотреть видео', ignore_case=True))
 async def video_1(message: types.Message, state: FSMContext):
     await bot.send_message(message.from_user.id, 'https://youtu.be/L1pWz0YEogM?si=nW8s0-Gd-prhWC9F',
@@ -87,16 +88,14 @@ async def video_2(message: types.Message, state: FSMContext):
             else:
                 await bot.send_message(
                     message.from_user.id,
-                    "👏 Отлично! Так держать. Вы уже узнали о настройках телефона и разобрались с уникальным стилем в съемке.\n"
-                    "Приготовила для вас подарок - \"Тренажер насмотренности\". 🎁"
+                    "👏 Отлично! Так держать. "
+                    "Вы уже узнали о настройках телефона и разобрались с уникальным стилем в съемке.\n"
+                    # "Приготовила для вас подарок - \"Тренажер насмотренности\". 🎁"
                 )
-                file_path = '/Users/aleksey/Desktop/тренажер насмотренности.txt'
-                with open(file_path, 'rb') as document:
-                    await bot.send_document(chat_id=message.from_user.id, document=document,
-                                            reply_markup=ReplyKeyboardRemove())
                 await bot.send_message(message.from_user.id, f'https://youtu.be/peGVJ56U3P0?si=URVYTYDOmIveOFvJ',
                                        reply_markup=ReplyKeyboardRemove())
                 await state.finish()  # Завершаем состояние
+                cancel_timer(message.from_user.id)
     else:
         await bot.send_message(
             message.from_user.id,
@@ -106,9 +105,7 @@ async def video_2(message: types.Message, state: FSMContext):
 
 async def wait_for_response(user_id, state: FSMContext):
     try:
-        await asyncio.sleep(43200)  # Исправлено на 10 секунд
-
-        ...
+        await asyncio.sleep(10)  # Исправлено на 10 секунд
         current_state = await state.get_state()
         if current_state != YourStateName.photo_sent.state:
             await bot.send_message(user_id,
@@ -125,12 +122,28 @@ async def wait_for_response(user_id, state: FSMContext):
 
 @dp.message_handler(Text(equals='Лайфхак', ignore_case=True))
 async def video_3(message: types.Message):
+    file_path = '/Users/aleksey/Desktop/тренажер насмотренности.txt'
+    with open(file_path, 'rb') as document:
+        await bot.send_document(
+            chat_id=message.from_user.id,
+            document=document,
+            caption="Приготовила для вас подарок - \"Тренажер насмотренности\". 🎁",
+            reply_markup=ReplyKeyboardRemove()
+        )
     await bot.send_message(message.from_user.id, f'https://youtu.be/_bY3rY2Vi2w?si=udLXMDjmeNkKUzdd',
                            reply_markup=kb_client_5)
 
 
 @dp.message_handler(Text(equals='лайфхак', ignore_case=True))
 async def video_3_1(message: types.Message):
+    file_path = '/Users/aleksey/Desktop/тренажер насмотренности.txt'
+    with open(file_path, 'rb') as document:
+        await bot.send_document(
+            chat_id=message.from_user.id,
+            document=document,
+            caption="Приготовила для вас подарок - \"Тренажер насмотренности\". 🎁",
+            reply_markup=ReplyKeyboardRemove()
+        )
     await bot.send_message(message.from_user.id, f'https://youtu.be/_bY3rY2Vi2w?si=udLXMDjmeNkKUzdd',
                            reply_markup=kb_client_5)
 
@@ -156,4 +169,4 @@ def handlers_register(dp: Dispatcher):
     dp.register_message_handler(video_1, Text(equals='📹 Смотреть видео', ignore_case=True))
     dp.register_message_handler(get_tariffs, Text(equals='💼 Познакомиться с тарифами', ignore_case=True))
     dp.register_message_handler(video_3, Text(equals='Лайфхак', ignore_case=True))
-    dp.register_message_handler(video_3_1, Text(equals='лайфухак', ignore_case=True))
+    dp.register_message_handler(video_3_1, Text(equals='лайфхак', ignore_case=True))
